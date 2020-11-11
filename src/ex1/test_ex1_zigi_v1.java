@@ -6,16 +6,34 @@ import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public class test_ex1_zigi_v1 {
 
-    @BeforeEach
-    void init(){
-        System.out.println("running zigi's test");
-        weighted_graph g0 = new WGraph_DS();
+    public static void remove_file(String file_name) throws IOException {
+        try {
+            Path path = Paths.get(file_name);
+            Files.deleteIfExists(path);
+        } catch (IOException x) {
+            // File permission problems are caught here.
+            System.err.println(x);
+        }
+    }
+
+    public static boolean compare(weighted_graph g0, weighted_graph g1) {
+        for (node_info n : g0.getV()) {
+            for (node_info ni : g0.getV(n.getKey())) {
+                if(! g1.hasEdge(n.getKey(), ni.getKey())) return false;
+                if( g1.getEdge(n.getKey(), ni.getKey()) != g0.getEdge(n.getKey(), ni.getKey())) return false;
+            }
+        }
+        if( g1.edgeSize() != g0.edgeSize()) return false;
+        return (g1.getV().size() == g0.getV().size());
     }
 
     @Test
@@ -45,7 +63,7 @@ public class test_ex1_zigi_v1 {
         g0.addNode(2);
         g0.addNode(1);
         g0.connect(2, 1, 3.2);
-        assertEquals(true, g0.hasEdge(1,2));
+        assertEquals(true, g0.hasEdge(1, 2));
     }
 
     @Test
@@ -120,7 +138,7 @@ public class test_ex1_zigi_v1 {
         g0.addNode(1);
         g0.connect(1, 1, 3.1);
         g0.connect(1, 1, 4.1);
-        assertEquals(0, g0.edgeSize()+g0.getV(1).size());
+        assertEquals(0, g0.edgeSize() + g0.getV(1).size());
     }
 
     @Test
@@ -192,7 +210,7 @@ public class test_ex1_zigi_v1 {
         ga.init(g0);
         weighted_graph g1 = ga.copy();
         double g1_1st_tag = g1.getNode(1).getTag();
-        g0.getNode(1).setTag(g1_1st_tag+1);
+        g0.getNode(1).setTag(g1_1st_tag + 1);
         assertEquals(false, g1.getNode(1).getTag() == g0.getNode(1).getTag());
     }
 
@@ -205,11 +223,11 @@ public class test_ex1_zigi_v1 {
         g0.connect(0, 1, 1);
         g0.connect(1, 2, 1);
         g0.connect(0, 2, 3);
-        
+
         weighted_graph_algorithms ga = new WGraph_Algo();
         ga.init(g0);
-        List<node_info> SP= ga.shortestPath(0, 2);
-        int[] expected = {0,1,2};
+        List<node_info> SP = ga.shortestPath(0, 2);
+        int[] expected = { 0, 1, 2 };
         boolean b = true;
         int i = 0;
         for (node_info n : SP) {
@@ -224,23 +242,23 @@ public class test_ex1_zigi_v1 {
         for (int i = 0; i < 10; i++) {
             g0.addNode(i);
         }
-        g0.connect(0, 1, 1);  //              2        10       
-        g0.connect(0, 2, 2);  //          (5)---(8)__________    
-        g0.connect(1, 4, 1);  //         /5 \3               \   
-        g0.connect(2, 5, 5);  //      (2)----\-----\10        \
-        g0.connect(2, 7, 10); //    2/       \   4  \     4    \
-        g0.connect(4, 3, 1);  //  (0)   1 _ (4)-----(7)--------(9)
-        g0.connect(4, 5, 3);  //    1\   /  1|                 /
-        g0.connect(4, 7, 4);  //      (1)   (3)               / 
-        g0.connect(3, 6, 1);  //              1\          1  /  
-        g0.connect(5, 8, 2);  //                (6)---------- 
-        g0.connect(6, 9, 1);  //                                
-        g0.connect(7, 9, 4);  //                                
-        g0.connect(9, 8, 10); //                                
+        g0.connect(0, 1, 1); // 2 10
+        g0.connect(0, 2, 2); // (5)---(8)__________
+        g0.connect(1, 4, 1); // /5 \3 \
+        g0.connect(2, 5, 5); // (2)----\-----\10 \
+        g0.connect(2, 7, 10); // 2/ \ 4 \ 4 \
+        g0.connect(4, 3, 1); // (0) 1 _ (4)-----(7)--------(9)
+        g0.connect(4, 5, 3); // 1\ / 1| /
+        g0.connect(4, 7, 4); // (1) (3) /
+        g0.connect(3, 6, 1); // 1\ 1 /
+        g0.connect(5, 8, 2); // (6)----------
+        g0.connect(6, 9, 1); //
+        g0.connect(7, 9, 4); //
+        g0.connect(9, 8, 10); //
         weighted_graph_algorithms ga = new WGraph_Algo();
         ga.init(g0);
-        List<node_info> SP= ga.shortestPath(0, 9);
-        int[] expected = {0,1,4,3,6,9};
+        List<node_info> SP = ga.shortestPath(0, 9);
+        int[] expected = { 0, 1, 4, 3, 6, 9 };
         boolean b = true;
         int i = 0;
         for (node_info n : SP) {
@@ -270,8 +288,8 @@ public class test_ex1_zigi_v1 {
         g0.connect(9, 8, 10);
         weighted_graph_algorithms ga = new WGraph_Algo();
         ga.init(g0);
-        List<node_info> SP= ga.shortestPath(9, 0);
-        int[] expected = {9,6,3,4,1,0};
+        List<node_info> SP = ga.shortestPath(9, 0);
+        int[] expected = { 9, 6, 3, 4, 1, 0 };
         boolean b = true;
         int i = 0;
         for (node_info n : SP) {
@@ -297,7 +315,7 @@ public class test_ex1_zigi_v1 {
         g0.connect(9, 8, 10);
         weighted_graph_algorithms ga = new WGraph_Algo();
         ga.init(g0);
-        List<node_info> SP= ga.shortestPath(0, 9);
+        List<node_info> SP = ga.shortestPath(0, 9);
         assertEquals(null, SP);
     }
 
@@ -316,6 +334,7 @@ public class test_ex1_zigi_v1 {
         }
         assertEquals(true, b);
     }
+
     @Test
     public void SP_dist_basic() {
         weighted_graph g0 = new WGraph_DS();
@@ -325,7 +344,7 @@ public class test_ex1_zigi_v1 {
         g0.connect(0, 1, 1);
         g0.connect(1, 2, 1);
         g0.connect(0, 2, 3);
-        
+
         weighted_graph_algorithms ga = new WGraph_Algo();
         ga.init(g0);
         assertEquals(2, ga.shortestPathDist(0, 2));
@@ -337,21 +356,80 @@ public class test_ex1_zigi_v1 {
         for (int i = 0; i < 10; i++) {
             g0.addNode(i);
         }
-        g0.connect(0, 1, 1);  //              2        10       
-        g0.connect(0, 2, 2);  //          (5)---(8)__________    
-        g0.connect(1, 4, 1);  //         /5 \3               \   
-        g0.connect(2, 5, 5);  //      (2)----\-----\10        \
-        g0.connect(2, 7, 10); //    2/       \   4  \     4    \
-        g0.connect(4, 3, 1);  //  (0)   1 _ (4)-----(7)--------(9)
-        g0.connect(4, 5, 3);  //    1\   /  1|                 /
-        g0.connect(4, 7, 4);  //      (1)   (3)               / 
-        g0.connect(3, 6, 1);  //              1\          1  /  
-        g0.connect(5, 8, 2);  //                (6)---------- 
-        g0.connect(6, 9, 1);  //                                
-        g0.connect(7, 9, 4);  //                                
-        g0.connect(9, 8, 10); //                                
+        g0.connect(0, 1, 1); // 2 10
+        g0.connect(0, 2, 2); // (5)---(8)__________
+        g0.connect(1, 4, 1); // /5 \3 \
+        g0.connect(2, 5, 5); // (2)----\-----\10 \
+        g0.connect(2, 7, 10); // 2/ \ 4 \ 4 \
+        g0.connect(4, 3, 1); // (0) 1 _ (4)-----(7)--------(9)
+        g0.connect(4, 5, 3); // 1\ / 1| /
+        g0.connect(4, 7, 4); // (1) (3) /
+        g0.connect(3, 6, 1); // 1\ 1 /
+        g0.connect(5, 8, 2); // (6)----------
+        g0.connect(6, 9, 1); //
+        g0.connect(7, 9, 4); //
+        g0.connect(9, 8, 10); //
         weighted_graph_algorithms ga = new WGraph_Algo();
         ga.init(g0);
         assertEquals(5, ga.shortestPathDist(0, 9));
+    }
+
+    @Test
+    public void save_basic() throws IOException {
+        String file_name = System.getProperty("user.dir")+"\\g0";
+        weighted_graph g0 = new WGraph_DS();
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        boolean b = ga.save(file_name);
+        remove_file(file_name);
+        assertEquals(true, b);
+    }
+
+    @Test
+    public void load_basic() throws IOException {
+        weighted_graph g1 = new WGraph_DS();
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        String file_name = System.getProperty("user.dir")+"\\g0";
+        ga.init(g1);
+        ga.save(file_name);
+        ga.load(file_name);
+        remove_file(file_name);
+        g1 = ga.getGraph();
+        boolean b = true;
+        b &= g1.edgeSize() == 0;
+        b &= g1.getV().isEmpty();
+        b &= g1.getV().size() == 0;
+        assertEquals(true, b); 
+    }
+
+    @Test
+    public void load() throws IOException {
+        weighted_graph g0 = new WGraph_DS();
+        for (int i = 0; i < 10; i++) {
+            g0.addNode(i);
+        }
+        g0.connect(0, 1, 1); // 2 10
+        g0.connect(0, 2, 2); // (5)---(8)__________
+        g0.connect(1, 4, 1); // /5 \3 \
+        g0.connect(2, 5, 5); // (2)----\-----\10 \
+        g0.connect(2, 7, 10); // 2/ \ 4 \ 4 \
+        g0.connect(4, 3, 1); // (0) 1 _ (4)-----(7)--------(9)
+        g0.connect(4, 5, 3); // 1\ / 1| /
+        g0.connect(4, 7, 4); // (1) (3) /
+        g0.connect(3, 6, 1); // 1\ 1 /
+        g0.connect(5, 8, 2); // (6)----------
+        g0.connect(6, 9, 1); //
+        g0.connect(7, 9, 4); //
+        g0.connect(9, 8, 10); //
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        String file_name = System.getProperty("user.dir")+"\\g0";
+        ga.save(file_name);
+        ga.init(new WGraph_DS());
+        ga.load(file_name);
+        remove_file(file_name);
+        weighted_graph g1 = ga.getGraph();
+        
+        assertEquals(true, compare(g0,g1)); 
     }
 }

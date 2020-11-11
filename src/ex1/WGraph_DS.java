@@ -1,22 +1,19 @@
 package ex1;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 
-public class WGraph_DS implements weighted_graph {
+public class WGraph_DS implements weighted_graph, Serializable{
     
-    private static class NodeInfo implements node_info {
 
+    private static class NodeInfo implements node_info, Serializable {
+
+        private static final long serialVersionUID = 3137094734563763916L;
         private static int id = 0;
         private int key;
         private String info;
         private double tag;
-
-        public NodeInfo() {
-            this.key = id++;
-            this.tag = -1;
-        }
 
         public NodeInfo(int key) {
             this.key = key;
@@ -54,8 +51,10 @@ public class WGraph_DS implements weighted_graph {
         }
     }
 
+    private static final long serialVersionUID = -4468900051198514988L;
+
+
     private HashMap<Integer,node_info> v;
-    // private HashMap<node_info,node_info> nei;
     private HashMap<Tuple,Double> e;
     private HashMap<node_info,HashMap<Integer,node_info>> ni;
     private int MC;
@@ -64,7 +63,6 @@ public class WGraph_DS implements weighted_graph {
         this.v = new HashMap<Integer, node_info>();
         this.e = new HashMap<Tuple,Double>();
         this.ni = new HashMap<node_info,HashMap<Integer,node_info>>();
-        // this.nei = new HashMap<node_info,node_info>();
         this.MC = 0;
     }
 
@@ -187,6 +185,7 @@ public class WGraph_DS implements weighted_graph {
 
     @Override
     public String toString() {
+        if(this.e.isEmpty()) return ""+this.v;
         String res = "{";
         for (Tuple t : this.e.keySet()) {
             res+=("["+t+": "+this.e.get(t)+"] ");

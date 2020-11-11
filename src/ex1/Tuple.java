@@ -1,6 +1,10 @@
 package ex1;
 
-public class Tuple implements Comparable<Tuple>{
+import java.io.Serializable;
+
+public class Tuple implements Comparable<Tuple>, Serializable{
+
+    private static final long serialVersionUID = -2018922364822746333L;
     private int a, b;
 
     public Tuple(int a, int b){
