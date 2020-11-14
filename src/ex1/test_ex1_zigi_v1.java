@@ -545,4 +545,53 @@ public class test_ex1_zigi_v1 {
         ga.init(g0);
         assertEquals(true, ga.isConnected());
     }
+
+    @Test
+    public void isConnected_advanced1() {
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        for (int i = 0; i < 1000000; i++) {
+            weighted_graph g0 = new WGraph_DS();
+            g0.addNode(0);
+            _rnd = new Random(1);
+            int v = nextRnd(0, 100);
+            for (int j = 1; j < v; j++) {
+                g0.addNode(j);
+                g0.connect(nextRnd(0, j-1), j, j);
+            }
+            ga.init(g0);
+            if(!ga.isConnected()){
+                System.out.println("failed with this graph:");
+                System.out.println(g0);
+                fail();
+            }
+        }
+    }
+
+    @Test
+    public void isConnected_advanced2() {
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        for (int i = 0; i < 1000000; i++) {
+            weighted_graph g0 = new WGraph_DS();
+            g0.addNode(0);
+            _rnd = new Random(1);
+            int v = nextRnd(2, 100);
+            for (int j = 1; j < v/2; j++) {
+                g0.addNode(j);
+                g0.connect(nextRnd(0, j-1), j, j);
+            }
+            g0.addNode(v/2);
+            for (int j = v/2+1; j < v; j++) {
+                g0.addNode(j);
+                g0.connect(nextRnd(0, j-1), j, j);
+            }
+            ga.init(g0);
+            if(ga.isConnected()){
+                System.out.println("nodes 0-"+(v/2-1)+" are not connected to nodes "+v/2+"-"+(v-1));
+                System.out.println("failed with this graph:");
+                System.out.println(g0);
+                fail();
+            }
+        }
+    }
 }
+
