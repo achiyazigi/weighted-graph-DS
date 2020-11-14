@@ -10,7 +10,6 @@ public class WGraph_DS implements weighted_graph, Serializable{
     private static class NodeInfo implements node_info, Serializable {
 
         private static final long serialVersionUID = 3137094734563763916L;
-        private static int id = 0;
         private int key;
         private String info;
         private double tag;
@@ -118,16 +117,15 @@ public class WGraph_DS implements weighted_graph, Serializable{
 
     @Override
     public void connect(int node1, int node2, double w) {
-        if(node1 != node2){
-            Tuple t = new Tuple(node1, node2);
-            if(!this.e.containsKey(t)){
-                this.e.put(t, w);
-                node_info n1 = this.getNode(node1);
-                node_info n2 = this.getNode(node2);
-                this.ni.get(n1).put(node2, n2);
-                this.ni.get(n2).put(node1, n1);
-                this.MC ++;
-            }
+        Tuple t = new Tuple(node1, node2);
+        if(node1 != node2 &&( this.e.get(t) == null || this.e.get(t) != w)){
+            this.e.put(t, w);
+            node_info n1 = this.getNode(node1);
+            node_info n2 = this.getNode(node2);
+            this.ni.get(n1).put(node2, n2);
+            this.ni.get(n2).put(node1, n1);
+            this.MC ++;
+            
         }
     }
 

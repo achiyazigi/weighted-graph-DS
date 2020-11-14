@@ -1,5 +1,6 @@
 package ex1;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -11,11 +12,64 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class test_ex1_zigi_v1 {
+    private static Random _rnd = null;
 
-    public static void remove_file(String file_name) throws IOException {
+    private static weighted_graph graph_creator(int v_size, int e_size, int seed) {
+        weighted_graph g = new WGraph_DS();
+        _rnd = new Random(seed);
+        for(int i=0;i<v_size;i++) {
+            
+            g.addNode(i);
+        }
+        while(g.edgeSize() < e_size) {
+            int a = nextRnd(0,v_size);
+            int b = nextRnd(0,v_size);
+            g.connect(a,b,nextRnd(1.0, 10));
+        }
+        return g;
+    }
+
+    private static int nextRnd(int min, int max) {
+        double v = nextRnd(0.0+min, (double)max);
+        int ans = (int)v;
+        return ans;
+    }
+    private static double nextRnd(double min, double max) {
+        double d = _rnd.nextDouble();
+        double dx = max-min;
+        double ans = d*dx+min;
+        return ans;
+    }
+
+    private static List<node_info> modifySP(weighted_graph g,int start){
+        List<node_info> res = new LinkedList<node_info>();
+        node_info cur = g.getNode(start);
+        if(cur == null) return null;
+        res.add(cur);
+        Collection<node_info> ni = g.getV(cur.getKey());
+        while(ni != null && !ni.isEmpty() && res.size() < 10){
+            cur.setTag(0);
+            Iterator<node_info> i = ni.iterator();
+            node_info tmp = i.next();
+            while(i.hasNext() && tmp.getTag() == 0)
+                tmp = i.next();
+            // if(tmp == null) System.out.println("+");
+            if(tmp.getTag() == 0) return res;
+            g.connect(cur.getKey(), tmp.getKey(), nextRnd(0.0, 0.1));
+            cur = tmp;
+            res.add(cur);
+            ni = g.getV(cur.getKey());
+        }
+        return res;
+    }
+
+    private static void remove_file(String file_name) throws IOException {
         try {
             Path path = Paths.get(file_name);
             Files.deleteIfExists(path);
@@ -79,7 +133,7 @@ public class test_ex1_zigi_v1 {
         g0.connect(1, 4, 4.2);
         g0.removeNode(4);
         g0.removeEdge(1, 3);
-        assertEquals(8, g0.getMC());
+        assertEquals(9, g0.getMC());
     }
 
     @Test
@@ -267,6 +321,27 @@ public class test_ex1_zigi_v1 {
         assertEquals(true, b);
     }
 
+
+    @Test
+    public void SP_advanced() {
+        _rnd = new Random(1);
+        for (int i = 0; i < 400000; i++) {
+            weighted_graph g = graph_creator(50, nextRnd(0, 100), i);           
+            int start = nextRnd(0, g.getV().size());
+            List<node_info> expected = modifySP(g,start);
+            weighted_graph_algorithms ga = new WGraph_Algo();
+            ga.init(g);
+            List<node_info> SP = ga.shortestPath(start, ((node_info)(expected.toArray()[expected.size()-1])).getKey());
+            boolean b = expected.equals(SP);
+            if(!b){
+                System.out.println("failed with this graph:");
+                System.out.println("(graph_craetor("+"50, "+g.edgeSize()+", "+i+")");
+                System.out.println(g);
+                fail();
+            }
+        }
+    }
+
     @Test
     public void SP_reversed() {
         weighted_graph g0 = new WGraph_DS();
@@ -431,5 +506,43 @@ public class test_ex1_zigi_v1 {
         weighted_graph g1 = ga.getGraph();
         
         assertEquals(true, compare(g0,g1)); 
+    }
+
+    @Test
+    public void isConnected_empty() {
+        weighted_graph g0 = new WGraph_DS();
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        assertEquals(true, ga.isConnected());
+    }
+
+    @Test
+    public void isConnected_1_node() {
+        weighted_graph g0 = new WGraph_DS();
+        g0.addNode(0);
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        assertEquals(true, ga.isConnected());
+    }
+
+    @Test
+    public void isConnected_basic1() {
+        weighted_graph g0 = new WGraph_DS();
+        g0.addNode(0);
+        g0.addNode(100);
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        assertEquals(false, ga.isConnected());
+    }
+
+    @Test
+    public void isConnected_basic2() {
+        weighted_graph g0 = new WGraph_DS();
+        g0.addNode(0);
+        g0.addNode(100);
+        g0.connect(100, 0, 77.999998);
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        assertEquals(true, ga.isConnected());
     }
 }

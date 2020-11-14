@@ -1,6 +1,8 @@
 package ex1;
 
 import java.io.*;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -29,8 +31,30 @@ public class WGraph_Algo implements weighted_graph_algorithms {
 
     @Override
     public boolean isConnected() {
-        // TODO Auto-generated method stub
-        return false;
+        this.reset(); // J.I.C. tags and info are not reset allready...
+        Queue<node_info> q = new LinkedList<node_info>();
+        Collection<node_info> col = this.g.getV();
+        int counter = 0;
+        if(!col.isEmpty()){ //if g isn't empty
+            node_info first = col.iterator().next();
+            first.setTag(1); // coloring
+            q.add(first);
+            while(!q.isEmpty()){
+                first = q.poll();
+                Iterator<node_info> i = this.g.getV(first.getKey()).iterator(); //taking first node in queue and adding its uncolored neighbors
+                counter++;
+                while(i.hasNext()){ //adding the neighbors
+                    node_info to_add = i.next();
+                    if(to_add.getTag() == -1){
+                        to_add.setTag(1); // coloring
+                        q.add(to_add);
+                    }
+                }
+            }
+            return counter == col.size();
+        }
+        
+        return true; //empty graph is connected
     }
 
     @Override
@@ -40,6 +64,7 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         node_info d = this.g.getNode(dest);
         if (cur == null || d == null)
             return -1;
+        this.reset();
         cur.setTag(0);
         q.add(cur);
         while (!q.isEmpty()) {
@@ -64,6 +89,7 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         node_info d = this.g.getNode(dest);
         if (cur == null || d == null)
             return null;
+        this.reset();
         cur.setTag(0);
         q.add(cur);
         while (!q.isEmpty()) {
@@ -71,8 +97,9 @@ public class WGraph_Algo implements weighted_graph_algorithms {
             int cur_key = cur.getKey();
             for (node_info n : this.g.getV(cur_key)) {
                 int n_key = n.getKey();
-                if (n.getTag() == -1 || n.getTag() > this.g.getEdge(n_key, cur_key) + cur.getTag()) {
-                    n.setTag(this.g.getEdge(n_key, cur_key) + cur.getTag());
+                double new_tag_candi =  this.g.getEdge(n_key, cur_key) + cur.getTag();
+                if (new_tag_candi >= 0 && (n.getTag() == -1 || n.getTag() > new_tag_candi)) { //found a bug of bit drop with larg graphs. so i need to protect new_tag_candi from becoming negative
+                    n.setTag(new_tag_candi);
                     n.setInfo("" + cur_key);
                     q.add(n);
                 }
@@ -127,6 +154,12 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         }
         res.push(cur);
         return res;
+    }
+    private void reset(){
+        for (node_info n : this.g.getV()) {
+            n.setTag(-1);
+            n.setInfo(null);
+        }
     }
 }
 

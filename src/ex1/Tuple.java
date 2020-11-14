@@ -44,5 +44,9 @@ public class Tuple implements Comparable<Tuple>, Serializable{
         return (other_.a == this.a && other_.b == this.b) || (other_.b == this.a && other_.a == this.b);
     }
     
+    @Override
+    public String toString() {
+        return "("+this.a+","+this.b+")";
+    }
 
 }
