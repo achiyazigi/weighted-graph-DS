@@ -21,6 +21,12 @@ public class WGraph_DS implements weighted_graph, Serializable{
             this.tag = -1;
         }
 
+        public NodeInfo(node_info other) {
+            this.key = other.getKey();
+            this.tag = other.getTag();
+            this.info = other.getInfo();
+        }
+
         @Override
         public int getKey() {
             return this.key;
@@ -70,22 +76,23 @@ public class WGraph_DS implements weighted_graph, Serializable{
         this.v = new HashMap<Integer, node_info>();
         this.e = new HashMap<Integer,HashMap<node_info,Double>>();
         
-        this.MC = other.getMC();
-
         for (node_info n : other.getV()) {
-            this.addNode(n.getKey());
-            node_info thisn = this.getNode(n.getKey());
-            thisn.setInfo(n.getInfo());
-            thisn.setTag(n.getTag());
+            int nkey = n.getKey();
+            this.v.put(nkey, new NodeInfo(n));
+            this.e.put(nkey, new HashMap<node_info, Double>());
         }
 
         for (node_info n : other.getV()) {
             int nkey = n.getKey();
             for (node_info con : other.getV(nkey)) {
                 int conkey = con.getKey();
-                this.connect(nkey, conkey, other.getEdge(nkey, conkey));
+                Double edge = other.getEdge(nkey, conkey);
+                this.e.get(nkey).put(this.v.get(conkey), edge);
+                this.e.get(conkey).put(this.v.get(nkey), edge);
             }
         }
+        this.edges = other.edgeSize();
+        this.MC = other.getMC();
     }
 
     @Override
