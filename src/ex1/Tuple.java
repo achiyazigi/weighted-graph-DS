@@ -40,7 +40,6 @@ public class Tuple implements Comparable<Tuple>, Serializable{
 
         Tuple other_ = (Tuple) other;
 
-        // this may cause NPE if nulls are valid values for x or y. The logic may be improved to handle nulls properly, if needed.
         return (other_.a == this.a && other_.b == this.b) || (other_.b == this.a && other_.a == this.b);
     }
     

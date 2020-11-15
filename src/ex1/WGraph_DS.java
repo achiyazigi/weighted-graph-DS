@@ -3,6 +3,8 @@ package ex1;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 public class WGraph_DS implements weighted_graph, Serializable{
     
@@ -54,21 +56,19 @@ public class WGraph_DS implements weighted_graph, Serializable{
 
 
     private HashMap<Integer,node_info> v;
-    private HashMap<Tuple,Double> e;
-    private HashMap<node_info,HashMap<Integer,node_info>> ni;
+    private HashMap<Integer,HashMap<node_info,Double>> e;
     private int MC;
+    private int edges;
 
     public WGraph_DS(){
         this.v = new HashMap<Integer, node_info>();
-        this.e = new HashMap<Tuple,Double>();
-        this.ni = new HashMap<node_info,HashMap<Integer,node_info>>();
+        this.e = new HashMap<Integer,HashMap<node_info,Double>>();
         this.MC = 0;
     }
 
     public WGraph_DS(weighted_graph other){
         this.v = new HashMap<Integer, node_info>();
-        this.e = new HashMap<Tuple,Double>();
-        this.ni = new HashMap<node_info,HashMap<Integer,node_info>>();
+        this.e = new HashMap<Integer,HashMap<node_info,Double>>();
         
         this.MC = other.getMC();
 
@@ -95,14 +95,14 @@ public class WGraph_DS implements weighted_graph, Serializable{
 
     @Override
     public boolean hasEdge(int node1, int node2) {
-        Tuple t = new Tuple(node1,node2);
-        return this.e.containsKey(t);
+        return this.e.containsKey(node1) && this.e.get(node1).containsKey(this.getNode(node2));
     }
 
     @Override
     public double getEdge(int node1, int node2) {
-        Tuple t = new Tuple(node1, node2);
-        if(this.e.containsKey(t)) return this.e.get(t);
+        if(this.hasEdge(node1, node2)){
+            return this.e.get(node1).get(this.getNode(node2));
+        }
         return -1;
     }
 
@@ -110,22 +110,21 @@ public class WGraph_DS implements weighted_graph, Serializable{
     public void addNode(int key) {
         if(!this.v.containsKey(key)){   
             this.v.put(key, new NodeInfo(key));
-            this.ni.put(this.getNode(key), new HashMap<Integer,node_info>());
+            this.e.put(key, new HashMap<node_info, Double>());
             this.MC ++;
         }
     }
 
     @Override
     public void connect(int node1, int node2, double w) {
-        Tuple t = new Tuple(node1, node2);
-        if(node1 != node2 &&( this.e.get(t) == null || this.e.get(t) != w)){
-            this.e.put(t, w);
-            node_info n1 = this.getNode(node1);
-            node_info n2 = this.getNode(node2);
-            this.ni.get(n1).put(node2, n2);
-            this.ni.get(n2).put(node1, n1);
-            this.MC ++;
-            
+        node_info n2 = this.getNode(node2);
+        node_info n1 = this.getNode(node1);
+        if(node1 == node2 || n1 == null || n2 == null) return;
+        if(!this.hasEdge(node1, node2) || this.e.get(node1).get(n2) != w){
+            this.e.get(node2).put(n1, w);
+            this.e.get(node1).put(n2, w);
+            this.edges ++;
+            this.MC ++;  
         }
     }
 
@@ -136,32 +135,30 @@ public class WGraph_DS implements weighted_graph, Serializable{
 
     @Override
     public Collection<node_info> getV(int node_id) {
-        node_info cur = this.getNode(node_id);
-        if(cur == null) return null; //if node_id not found
-        return this.ni.get(cur).values();
+        if(this.v.containsKey(node_id))
+            return this.e.get(node_id).keySet();
+        return null;
     }
 
     @Override
     public node_info removeNode(int key) {
         if(this.v.containsKey(key)){
-            for (node_info n : this.getV(key)) {
-                Tuple t = new Tuple(key, n.getKey());
-                this.e.remove(t);
-                this.ni.get(n).remove(key);
+            Collection<node_info> ni = new HashSet<node_info>(this.getV(key));
+            for (node_info n : ni) {
+                this.removeEdge(key, n.getKey());
             }
-            this.ni.remove(this.getNode(key));
             this.MC ++;
+            this.MC -= ni.size();
         }
         return this.v.remove(key);
     }
 
     @Override
     public void removeEdge(int node1, int node2) {
-        Tuple t = new Tuple(node1,node2);
-        if(this.e.containsKey(t)){
-            this.e.remove(t);
-            this.ni.get(this.getNode(node1)).remove(node2);
-            this.ni.get(this.getNode(node2)).remove(node1);
+        if(this.hasEdge(node1, node2)){
+            this.e.get(node1).remove(this.getNode(node2));
+            this.e.get(node2).remove(this.getNode(node1));
+            this.edges --;
             this.MC++;
         }
     }
@@ -173,7 +170,7 @@ public class WGraph_DS implements weighted_graph, Serializable{
 
     @Override
     public int edgeSize() {
-        return this.e.size();
+        return this.edges;
     }
 
     @Override
@@ -183,10 +180,14 @@ public class WGraph_DS implements weighted_graph, Serializable{
 
     @Override
     public String toString() {
-        if(this.e.isEmpty()) return ""+this.v;
         String res = "{";
-        for (Tuple t : this.e.keySet()) {
-            res+=("["+t+": "+this.e.get(t)+"] ");
+        for (node_info n : this.v.values()) {
+            int nkey = n.getKey();
+            res+="(";
+            for (node_info ni : this.getV(nkey)) {
+                res+=" <"+nkey+","+ni.getKey()+">"+this.e.get(nkey).get(ni)+" ";
+            }
+            res+=") ";
         }
         return res+"}";
     }
