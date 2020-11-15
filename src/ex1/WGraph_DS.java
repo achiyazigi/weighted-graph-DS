@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 
 public class WGraph_DS implements weighted_graph, Serializable{
     
@@ -50,6 +49,11 @@ public class WGraph_DS implements weighted_graph, Serializable{
         @Override
         public void setTag(double t) {
             this.tag = t;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(this.key);
         }
 
         @Override
