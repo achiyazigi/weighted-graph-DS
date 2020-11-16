@@ -212,7 +212,8 @@ public class test_WGraph_Algo {
             if(!b){
                 System.out.println("failed with this graph:");
                 System.out.println("(graph_craetor("+"50, "+g.edgeSize()+", "+i+")");
-                System.out.println(g);
+                System.out.println(expected);
+                System.out.println(SP);
                 fail();
             }
         }
@@ -342,9 +343,9 @@ public class test_WGraph_Algo {
         weighted_graph_algorithms ga = new WGraph_Algo();
         String file_name = System.getProperty("user.dir")+"\\g0";
         ga.init(g1);
+        remove_file(file_name);
         ga.save(file_name);
         ga.load(file_name);
-        remove_file(file_name);
         g1 = ga.getGraph();
         boolean b = true;
         b &= g1.edgeSize() == 0;
@@ -379,10 +380,10 @@ public class test_WGraph_Algo {
         ga.save(file_name);
         ga.init(new WGraph_DS());
         ga.load(file_name);
-        remove_file(file_name);
         weighted_graph g1 = ga.getGraph();
         
         assertEquals(true, compare(g0,g1)); 
+        remove_file(file_name);
     }
 
     @Test
@@ -472,7 +473,7 @@ public class test_WGraph_Algo {
     }
 
     @Test
-    public void runtime() {
+    public void runtime1() {
         weighted_graph g0 = new WGraph_DS();
         for (int i = 0; i < 100000; i++) {
             g0.addNode(i);
@@ -500,5 +501,37 @@ public class test_WGraph_Algo {
             e.printStackTrace();
         }
         System.out.println((System.currentTimeMillis()-start)/1000.0+"s'");
+    }
+    @Test
+    public void runtime2() {
+        long start = System.currentTimeMillis();
+        weighted_graph g0 = graph_creator(1000000, 10000000, 1);
+        long cur = System.currentTimeMillis()-start;
+        System.out.println("graph created after " + cur/1000.0+"s'");
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        ga.copy();
+        cur = System.currentTimeMillis()-cur;
+        System.out.println("performed deep copy in "+cur/1000.0+"s'");
+        int p = nextRnd(0, 1000000);
+        int q = nextRnd(0, 1000000);
+        ga.shortestPath(p, q);
+        cur = System.currentTimeMillis()-cur;
+        System.out.println("performed shortest path in "+cur/1000.0+"s'");
+        ga.shortestPathDist(p,q);
+        cur = System.currentTimeMillis()-cur;
+        System.out.println("performed shortest path dist in "+cur/1000.0+"s'");
+        ga.save("g0");
+        cur = System.currentTimeMillis()-cur;
+        System.out.println("performed save in "+cur/1000.0+"s'");
+        ga.load("g0");
+        cur = System.currentTimeMillis()-cur;
+        System.out.println("performed load in "+cur/1000.0+"s'");
+        try {
+            remove_file("g0");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("overall: "+(System.currentTimeMillis()-start)/1000.0+"s'");
     }
 }

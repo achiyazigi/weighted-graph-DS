@@ -9,37 +9,61 @@ import java.util.Queue;
 
 public class WGraph_Algo implements weighted_graph_algorithms {
 
-    /**
-     *
-     */
     private weighted_graph g;
 
+    
+    /** 
+     * Graph to initialize.
+     * @param g
+     */
     @Override
     public void init(weighted_graph g) {
         this.g = g;
     }
 
+    
+    /** 
+     * A method to retrieve the initialized graph.
+     * return null if nothing has been initialized before.
+     * @return weighted_graph
+     */
     @Override
     public weighted_graph getGraph() {
         return this.g;
     }
 
+    
+    /** 
+     * Perfom a deep copy by rebuilding the graph from scratch,
+     * copying each node to a new one, adding it to the new graph,
+     *  and reconnecting each node by the data from the initialized graph's edge map.
+     * @return weighted_graph
+     */
     @Override
     public weighted_graph copy() {
         return new WGraph_DS(this.g);
     }
 
+    
+    /** 
+     * A simple BFS concept, implemented with Queue.
+     * Coloring a node by changing its tag, poping it from the Queue, and addind it's neighbors.
+     * 
+     * @return true iff the number of nodes poped out from the Queue equals to the number of nodes in the graph.
+     */
     @Override
     public boolean isConnected() {
         this.reset(); // J.I.C. tags and info are not reset allready...
         Queue<node_info> q = new LinkedList<node_info>();
         Collection<node_info> col = this.g.getV();
         int counter = 0;
+        if(this.g.edgeSize()+1 < col.size()) return false;
         if(!col.isEmpty()){ //if g isn't empty
             node_info first = col.iterator().next();
             first.setTag(1); // coloring
             q.add(first);
             while(!q.isEmpty()){
+                if(q.size() == col.size()) return true;
                 first = q.poll();
                 Iterator<node_info> i = this.g.getV(first.getKey()).iterator(); //taking first node in queue and adding its uncolored neighbors
                 counter++;
@@ -57,6 +81,17 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         return true; //empty graph is connected
     }
 
+    
+    /** 
+     * Combining Dijaksta and dp, this function changing each node tag on its way, to the distance from starting point.
+     * when and if destination is reached, a better path is being check.
+     * after first time of coloring dest, nodes with colored tags grater then dest's tag are banned,
+     * and won't be added to the queue, so their neighbors won't be visited again from their direction.
+     * a node can be unbanned by improving it's tag.
+     * @param src
+     * @param dest
+     * @return double
+     */
     @Override
     public double shortestPathDist(int src, int dest) {
         Queue<node_info> q = new LinkedList<node_info>();
@@ -69,45 +104,39 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         q.add(cur);
         while (!q.isEmpty()) {
             cur = q.poll();
-            int cur_key = cur.getKey();
-            for (node_info n : this.g.getV(cur_key)) {
-                int n_key = n.getKey();
-                if (n.getTag() == -1 || n.getTag() > this.g.getEdge(n_key, cur_key) + cur.getTag()) {
-                    n.setTag(this.g.getEdge(n_key, cur_key) + cur.getTag());
-                    n.setInfo("" + cur_key);
-                    q.add(n);
+            if(d.getTag() == -1 || cur.getTag()<d.getTag()){
+                int cur_key = cur.getKey();
+                for (node_info n : this.g.getV(cur_key)) {
+                    int n_key = n.getKey();
+                    double new_tag_candi =  this.g.getEdge(n_key, cur_key) + cur.getTag();
+                    if (new_tag_candi >= 0 && (n.getTag() == -1 || n.getTag() > new_tag_candi)) { //found a bug of bit drop with larg graphs. so i need to protect new_tag_candi from becoming negative
+                        n.setTag(new_tag_candi);
+                        n.setInfo("" + cur_key);
+                        if(n!=d)
+                            q.add(n);
+                    }
                 }
             }
         }
         return d.getTag();
     }
-
+    
+    /** 
+     * @param src
+     * @param dest
+     * @return List<node_info>
+     */
     @Override
     public List<node_info> shortestPath(int src, int dest) {
-        Queue<node_info> q = new LinkedList<node_info>();
-        node_info cur = this.g.getNode(src);
-        node_info d = this.g.getNode(dest);
-        if (cur == null || d == null)
-            return null;
-        this.reset();
-        cur.setTag(0);
-        q.add(cur);
-        while (!q.isEmpty()) {
-            cur = q.poll();
-            int cur_key = cur.getKey();
-            for (node_info n : this.g.getV(cur_key)) {
-                int n_key = n.getKey();
-                double new_tag_candi =  this.g.getEdge(n_key, cur_key) + cur.getTag();
-                if (new_tag_candi >= 0 && (n.getTag() == -1 || n.getTag() > new_tag_candi)) { //found a bug of bit drop with larg graphs. so i need to protect new_tag_candi from becoming negative
-                    n.setTag(new_tag_candi);
-                    n.setInfo("" + cur_key);
-                    q.add(n);
-                }
-            }
-        }
+        if(this.shortestPathDist(src, dest) == -1) return null;
         return BuildPath(dest, src);
     }
 
+    
+    /** 
+     * @param file_name
+     * @return boolean
+     */
     @Override
     public boolean save(String file_name) {
         ObjectOutputStream oos;
@@ -127,13 +156,18 @@ public class WGraph_Algo implements weighted_graph_algorithms {
     }
 
     
+    
+    /** 
+     * @param file_name
+     * @return boolean
+     */
     @Override
     public boolean load(String file_name) {
         try {
             FileInputStream streamIn = new FileInputStream(file_name);
             ObjectInputStream objectinputstream = new ObjectInputStream(streamIn);
             weighted_graph readCase = (weighted_graph) objectinputstream.readObject();
-            this.g = new WGraph_DS(readCase);
+            this.g = readCase;
             objectinputstream.close();
         }
         catch(Exception e) {
@@ -144,6 +178,12 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         return true;
     }
 
+    
+    /** 
+     * @param src
+     * @param dest
+     * @return LinkedList<node_info>
+     */
     private LinkedList<node_info> BuildPath(int src, int dest) {
         LinkedList<node_info> res = new LinkedList<node_info>();
         node_info cur = this.g.getNode(src);

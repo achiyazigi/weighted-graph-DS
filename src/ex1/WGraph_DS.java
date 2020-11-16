@@ -99,16 +99,38 @@ public class WGraph_DS implements weighted_graph, Serializable{
         this.MC = other.getMC();
     }
 
+    
+    /** 
+     * Retrieve a node by it's key.
+     * @param key
+     * @return node_info
+     */
     @Override
     public node_info getNode(int key) {
         return this.v.get(key);
     }
 
+    
+    /** 
+     * Check if there is a key 'node1',
+     * maping to a node with key 'node2'
+     * Note: The order doesn't matter.
+     * @param node1
+     * @param node2
+     * @return boolean
+     */
     @Override
     public boolean hasEdge(int node1, int node2) {
         return this.e.containsKey(node1) && this.e.get(node1).containsKey(this.getNode(node2));
     }
 
+    
+    /** 
+     * Returns the edge value if existed, else: -1. 
+     * @param node1
+     * @param node2
+     * @return double
+     */
     @Override
     public double getEdge(int node1, int node2) {
         if(this.hasEdge(node1, node2)){
@@ -117,6 +139,13 @@ public class WGraph_DS implements weighted_graph, Serializable{
         return -1;
     }
 
+    
+    /** 
+     * Adding a node with a given key to the graph.
+     * it also create a new map of connected nodes.
+     * Note: By adding a node,
+     * @param key
+     */
     @Override
     public void addNode(int key) {
         if(!this.v.containsKey(key)){   
@@ -126,6 +155,14 @@ public class WGraph_DS implements weighted_graph, Serializable{
         }
     }
 
+    
+    /** 
+     * Connecting two nodes.
+     * The weight will be mapped twice, for each node, so it will be posible getting neighbors in O(1) complexity.
+     * @param node1
+     * @param node2
+     * @param w - weight
+     */
     @Override
     public void connect(int node1, int node2, double w) {
         node_info n2 = this.getNode(node2);
@@ -139,11 +176,23 @@ public class WGraph_DS implements weighted_graph, Serializable{
         }
     }
 
+    
+    /** 
+     * A method to get all nodes in the graph.
+     * @return Collection<node_info>
+     */
     @Override
     public Collection<node_info> getV() {
         return this.v.values();
     }
 
+    
+    /** 
+     * Getting a collection of a node with key = 'node_id' neighbors.
+     * It's gust the key set of the 'node_id' edges map.
+     * @param node_id
+     * @return Collection<node_info>
+     */
     @Override
     public Collection<node_info> getV(int node_id) {
         if(this.v.containsKey(node_id))
@@ -151,6 +200,12 @@ public class WGraph_DS implements weighted_graph, Serializable{
         return null;
     }
 
+    
+    /** 
+     * Iterating over each node connected with 'key', removing the edge between them, and finaly removing the desire node.
+     * @param key
+     * @return node_info
+     */
     @Override
     public node_info removeNode(int key) {
         if(this.v.containsKey(key)){
@@ -164,6 +219,12 @@ public class WGraph_DS implements weighted_graph, Serializable{
         return this.v.remove(key);
     }
 
+    
+    /** 
+     * Removing the mapped value from 'node1' to 'node2' and vice versa.
+     * @param node1
+     * @param node2
+     */
     @Override
     public void removeEdge(int node1, int node2) {
         if(this.hasEdge(node1, node2)){
@@ -174,16 +235,30 @@ public class WGraph_DS implements weighted_graph, Serializable{
         }
     }
 
+    
+    /** 
+     * -
+     * @return Number of nodes in the graph.
+     */
     @Override
     public int nodeSize() {
         return this.v.size();
     }
 
+    
+    /** 
+     * -
+     * @return Number of edges in the graph
+     */
     @Override
     public int edgeSize() {
         return this.edges;
     }
 
+    
+    /** 
+     * @return int
+     */
     @Override
 	public int getMC() {
 		return this.MC;
@@ -202,28 +277,7 @@ public class WGraph_DS implements weighted_graph, Serializable{
         }
         return res+"}";
     }
-    
     public static void main(String[] args) {
-        weighted_graph g0 = new WGraph_DS();
-        for (int i = 0; i < 10; i++) {
-            g0.addNode(i);
-        }
-        g0.connect(0, 1, 1);
-        g0.connect(0, 2, 2);
-        g0.connect(1, 4, 1);
-        g0.connect(2, 5, 5);
-        g0.connect(2, 7, 10);
-        g0.connect(4, 3, 1);
-        g0.connect(4, 5, 3);
-        g0.connect(4, 7, 4);
-        g0.connect(3, 6, 1);
-        g0.connect(5, 8, 2);
-        g0.connect(6, 9, 1);
-        g0.connect(7, 9, 4);
-        g0.connect(9, 8, 10);
-        System.out.println(g0);
-        weighted_graph_algorithms ga = new WGraph_Algo();
-        ga.init(g0);
-        System.out.println(ga.shortestPath(0, 9));
+        System.out.println("hi");
     }
 }
