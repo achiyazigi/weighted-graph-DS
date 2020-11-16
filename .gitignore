@@ -1,2 +1,4 @@
 src/ex1/Tuple.java
 src/ex1/test_ex1_zigi_v1.java
+test/ex1/WGraph_AlgoTest.java
+test/ex1/WGraph_DSTest.java

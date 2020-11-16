@@ -167,13 +167,13 @@ public class WGraph_DS implements weighted_graph, Serializable{
     public void connect(int node1, int node2, double w) {
         node_info n2 = this.getNode(node2);
         node_info n1 = this.getNode(node1);
-        if(node1 == node2 || n1 == null || n2 == null) return;
-        if(!this.hasEdge(node1, node2) || this.e.get(node1).get(n2) != w){
-            this.e.get(node2).put(n1, w);
-            this.e.get(node1).put(n2, w);
+        if(node1 == node2 || n1 == null || n2 == null || (this.hasEdge(node1, node2) && this.e.get(node1).get(n2) == w)) return;
+        if(!this.hasEdge(node1, node2)){
             this.edges ++;
-            this.MC ++;  
         }
+        this.e.get(node2).put(n1, w);
+        this.e.get(node1).put(n2, w);
+        this.MC ++;  
     }
 
     
@@ -262,6 +262,20 @@ public class WGraph_DS implements weighted_graph, Serializable{
     @Override
 	public int getMC() {
 		return this.MC;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || obj.getClass() != this.getClass()) return false;
+        weighted_graph o = (weighted_graph)obj;
+        if(this.MC != o.getMC() || this.edges != o.edgeSize()) return false;
+        for (node_info n : this.getV()) {
+            for (node_info ni : this.getV(n.getKey())) {
+                if(! o.hasEdge(n.getKey(), ni.getKey())) return false;
+                if( o.getEdge(n.getKey(), ni.getKey()) != this.getEdge(n.getKey(), ni.getKey())) return false;
+            }
+        }
+        return (o.nodeSize() == this.nodeSize());
     }
 
     @Override
