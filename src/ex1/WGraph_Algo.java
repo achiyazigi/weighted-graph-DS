@@ -11,8 +11,7 @@ public class WGraph_Algo implements weighted_graph_algorithms {
 
     private weighted_graph g;
 
-    
-    /** 
+    /**
      * Graph to initialize.
      * @param g
      */
@@ -21,10 +20,10 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         this.g = g;
     }
 
-    
-    /** 
-     * A method to retrieve the initialized graph.
-     * return null if nothing has been initialized before.
+    /**
+     * A method to retrieve the initialized graph. return null if nothing has been
+     * initialized before.
+     * 
      * @return weighted_graph
      */
     @Override
@@ -32,11 +31,11 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         return this.g;
     }
 
-    
-    /** 
-     * Perfom a deep copy by rebuilding the graph from scratch,
-     * copying each node to a new one, adding it to the new graph,
-     *  and reconnecting each node by the data from the initialized graph's edge map.
+    /**
+     * Perfom a deep copy by rebuilding the graph from scratch, copying each node to
+     * a new one, adding it to the new graph, and reconnecting each node by the data
+     * from the initialized graph's edge map.
+     * 
      * @return weighted_graph
      */
     @Override
@@ -44,12 +43,12 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         return new WGraph_DS(this.g);
     }
 
-    
-    /** 
-     * A simple BFS concept, implemented with Queue.
-     * Coloring a node by changing its tag, poping it from the Queue, and addind it's neighbors.
+    /**
+     * A simple BFS concept, implemented with Queue. Coloring a node by changing its
+     * tag, poping it from the Queue, and addind it's neighbors.
      * 
-     * @return true iff the number of nodes poped out from the Queue equals to the number of nodes in the graph.
+     * @return true iff the number of nodes poped out from the Queue equals to the
+     *         number of nodes in the graph.
      */
     @Override
     public boolean isConnected() {
@@ -57,19 +56,22 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         Queue<node_info> q = new LinkedList<node_info>();
         Collection<node_info> col = this.g.getV();
         int counter = 0;
-        if(this.g.edgeSize()+1 < col.size()) return false;
-        if(!col.isEmpty()){ //if g isn't empty
+        if (this.g.edgeSize() + 1 < col.size())
+            return false;
+        if (!col.isEmpty()) { // if g isn't empty
             node_info first = col.iterator().next();
             first.setTag(1); // coloring
             q.add(first);
-            while(!q.isEmpty()){
-                if(q.size() == col.size()) return true;
+            while (!q.isEmpty()) {
+                if (q.size() == col.size())
+                    return true;
                 first = q.poll();
-                Iterator<node_info> i = this.g.getV(first.getKey()).iterator(); //taking first node in queue and adding its uncolored neighbors
+                Iterator<node_info> i = this.g.getV(first.getKey()).iterator(); // taking first node in queue and adding
+                                                                                // its uncolored neighbors
                 counter++;
-                while(i.hasNext()){ //adding the neighbors
+                while (i.hasNext()) { // adding the neighbors
                     node_info to_add = i.next();
-                    if(to_add.getTag() == -1){
+                    if (to_add.getTag() == -1) {
                         to_add.setTag(1); // coloring
                         q.add(to_add);
                     }
@@ -77,17 +79,19 @@ public class WGraph_Algo implements weighted_graph_algorithms {
             }
             return counter == col.size();
         }
-        
-        return true; //empty graph is connected
+
+        return true; // empty graph is connected
     }
 
-    
-    /** 
-     * Combining Dijaksta and dp, this function changing each node tag on its way, to the distance from starting point.
-     * when and if destination is reached, a better path is being check.
-     * after first time of coloring dest, nodes with colored tags grater then dest's tag are banned,
-     * and won't be added to the queue, so their neighbors won't be visited again from their direction.
-     * a node can be unbanned by improving it's tag.
+
+    /**
+     * Combining Dijaksta and dp, this function changing each node tag on its way,
+     * to the distance from starting point. when and if destination is reached, a
+     * better path is being check. after first time of coloring dest, nodes with
+     * colored tags grater then dest's tag are banned, and won't be added to the
+     * queue, so their neighbors won't be visited again from their direction. a node
+     * can be unbanned by improving it's tag.
+     * 
      * @param src
      * @param dest
      * @return double
@@ -104,15 +108,15 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         q.add(cur);
         while (!q.isEmpty()) {
             cur = q.poll();
-            if(d.getTag() == -1 || cur.getTag()<d.getTag()){
+            if (d.getTag() == -1 || cur.getTag() < d.getTag()) {
                 int cur_key = cur.getKey();
                 for (node_info n : this.g.getV(cur_key)) {
                     int n_key = n.getKey();
-                    double new_tag_candi =  this.g.getEdge(n_key, cur_key) + cur.getTag();
-                    if (new_tag_candi >= 0 && (n.getTag() == -1 || n.getTag() > new_tag_candi)) { //found a bug of bit drop with larg graphs. so i need to protect new_tag_candi from becoming negative
+                    double new_tag_candi = this.g.getEdge(n_key, cur_key) + cur.getTag();
+                    if (new_tag_candi >= 0 && (n.getTag() == -1 || n.getTag() > new_tag_candi)) { // found a bug of bit drop with larg graphs. so i need to protect new_tag_candi from becoming negative
                         n.setTag(new_tag_candi);
                         n.setInfo("" + cur_key);
-                        if(n!=d)
+                        if (n != d)
                             q.add(n);
                     }
                 }
@@ -120,8 +124,9 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         }
         return d.getTag();
     }
-    
+
     /** 
+     * By coloring the nodes with shortestPathDist, all work left is to build the path by backtracking and getting from each node, starting from the dest, the key that led it to the next. it stored in the info of each node in the path.
      * @param src
      * @param dest
      * @return List<node_info>
@@ -134,6 +139,7 @@ public class WGraph_Algo implements weighted_graph_algorithms {
 
     
     /** 
+     * saving serializable Object as ObjectOutputStream
      * @param file_name
      * @return boolean
      */
@@ -158,6 +164,7 @@ public class WGraph_Algo implements weighted_graph_algorithms {
     
     
     /** 
+     * Loading serializable Object as objectinputstream.
      * @param file_name
      * @return boolean
      */
@@ -180,6 +187,7 @@ public class WGraph_Algo implements weighted_graph_algorithms {
 
     
     /** 
+     * Backtracking as described in shortestPth().
      * @param src
      * @param dest
      * @return LinkedList<node_info>
@@ -195,6 +203,10 @@ public class WGraph_Algo implements weighted_graph_algorithms {
         res.push(cur);
         return res;
     }
+
+    /**
+     * reseting tags and info as a preperation to sortestPathDist an isConnected.
+     */
     private void reset(){
         for (node_info n : this.g.getV()) {
             n.setTag(-1);

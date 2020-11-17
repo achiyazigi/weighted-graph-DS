@@ -382,7 +382,7 @@ public class test_WGraph_Algo {
         ga.load(file_name);
         weighted_graph g1 = ga.getGraph();
         
-        assertEquals(true, compare(g0,g1)); 
+        assertEquals(g0, g1); 
         remove_file(file_name);
     }
 
@@ -533,5 +533,13 @@ public class test_WGraph_Algo {
             e.printStackTrace();
         }
         System.out.println("overall: "+(System.currentTimeMillis()-start)/1000.0+"s'");
+    }
+
+    @Test
+    public void get_graph(){
+        weighted_graph g0 = new WGraph_DS();
+        weighted_graph_algorithms ga = new WGraph_Algo();
+        ga.init(g0);
+        assertEquals(ga.getGraph().hashCode(), g0.hashCode());
     }
 }
