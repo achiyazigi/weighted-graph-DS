@@ -1,4 +1,4 @@
-package ex1;
+package ex1.src;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -291,7 +291,5 @@ public class WGraph_DS implements weighted_graph, Serializable{
         }
         return res+"}";
     }
-    public static void main(String[] args) {
-        System.out.println("hi");
-    }
+
 }
